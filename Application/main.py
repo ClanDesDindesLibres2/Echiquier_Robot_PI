@@ -1,4 +1,5 @@
 import threading
+import time
 from Comm.EthernetComm import *
 from Comm.MessageIO import *
 from Comm.SerialComm import *
@@ -51,15 +52,18 @@ if __name__ == '__main__':
     #driveManager.setJoinPosition([1])
     
     #TEST 2 
+    """ 
     Messenger = MessageIO()
-    Messenger.addDevice(SerialComm("COM3", 57000))
-    driveManager = DriveManager([0], Messenger)
-    Joins = JoinSystem()
-    Joins.addJoin(RevoluteJoin(VectorSpaceAxis.Y, np.array([0, 0, 0]), [-math.pi/4, 2 * math.pi-0.4], hardwareStepDistance= math.pi*2/4096))
-    robot =  robotAPI(Joins,[0.], driveManager)
+    Messenger.addDevice(SerialComm("COM3", 57600))
     msg = ControlMessage(ControlMessage.SET_JOIN_POSITION, [2500])
-    print('message : ' , msg)
-    robot.executeCommand(msg)
+    """
+    Comm = SerialComm("COM3",57600)
+    while(True):
+        Comm.sendJSon(1000)
+        time.sleep(10)
+        
+       
+    
 
 
     
