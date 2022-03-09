@@ -4,6 +4,9 @@
 from __future__ import print_function
 import re, sys, time
 import serial
+import RPi.GPIO as GPIO   
+
+
 from itertools import count
 from collections import namedtuple
 ser = serial.Serial('COM3', 9600)
@@ -416,7 +419,52 @@ def enterPos(): #retourne la position voulu, mettre le code de commucation et ma
     
     deplacement = "a2a4"
     return deplacement
+def setupLedRGB(): #Setup des parametres pour la led RGB 
+    GPIO.setmode(GPIO.BCM)  # choose BCM numbering scheme.  
 
+    GPIO.setup(17, GPIO.OUT)# set GPIO 17 as output for white led  
+    GPIO.setup(27, GPIO.OUT)# set GPIO 27 as output for red led  
+    GPIO.setup(22, GPIO.OUT)# set GPIO 22 as output for red led
+    
+    hz = input('Please define the frequency in Herz(recommended:75): ')
+    reddc = input('Please define the red LED Duty Cycle: ')
+    greendc = input('Please define the green LED Duty Cycle: ')
+    bluedc = input('Please define the blue LED Duty Cycle: ')
+    
+    red = GPIO.PWM(17, hz)    # create object red for PWM on port 17  
+    green = GPIO.PWM(27, hz)      # create object green for PWM on port 27   
+    blue = GPIO.PWM(22, hz)      # create object blue for PWM on port 22
+    return 1
+
+def ledRGB(self, ledState):#implementaiton de la led RGB avec couleurs et actions
+    try:   
+    while True:
+        red.start((reddc/2.55))   #start red led
+        green.start((greendc/2.55)) #start green led
+        blue.start((bluedc/2.55))  #start blue led
+    except KeyboardInterrupt:
+        red.stop()   #stop red led
+        green.stop() #stop green led
+        blue.stop()  #stop blue led
+   
+        GPIO.cleanup()
+        
+    switcher = {
+        "You Lost": 2+2,
+        2: "You Won",
+        3: "March",
+        4: "April",
+        5: "May",
+        6: "June",
+        7: "July",
+        8: "August",
+        9: "September",
+        10: "October",
+        11: "November",
+        12: "December"
+    }
+    ledChange  = (switcher.get(ledState, "Invalid state"))
+    return ledChange
 
 
 def main():
