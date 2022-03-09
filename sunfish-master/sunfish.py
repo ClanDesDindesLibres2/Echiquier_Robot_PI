@@ -9,6 +9,7 @@ from collections import namedtuple
 ser = serial.Serial('COM3', 9600)
 s = [0]
 #test push 
+#push test 2
 ###############################################################################
 # Piece-Square tables. Tune these to change sunfish's behaviour
 ###############################################################################
