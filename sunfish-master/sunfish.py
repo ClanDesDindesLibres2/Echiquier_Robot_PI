@@ -7,7 +7,7 @@ import serial
 from itertools import count
 from collections import namedtuple
 
-ser = serial.Serial('COM3', 9600)
+#ser = serial.Serial('COM3', 9600)
 s = [0]
 #test push 
 
@@ -502,11 +502,14 @@ def main():
         # 'back rotate' the move before printing it.
 
         
-        print(render(119-move[0]) + " to "+ render(119-move[1]))
+        #print(render(119-move[0]) + " to "+ render(119-move[1]))
         hist.append(hist[-1].move(move))
         y = analyseboardalphab(render(119-move[1]))+analyseboardint(render(119-move[1]))
         
+        print(render(119-move[0]) + " to "+ render(119-move[1]) + " piece blanche: " )
+        print(boardblanc[y])
         #print(y)
+      
         boardblanc[y] = 0
         
 if __name__ == '__main__':
