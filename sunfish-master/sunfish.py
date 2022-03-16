@@ -3,6 +3,7 @@
 
 from __future__ import print_function
 import re, sys, time
+from xml.etree.ElementTree import tostring
 import serial
 import RPi.GPIO as GPIO
 
@@ -423,8 +424,15 @@ def enterPos(): #retourne la position voulu, mettre le code de commucation et ma
 
     # print(initiale, finale)
     # deplacement = input('Your move: ')
-    
-    deplacement = "a2a4"
+
+    #Rasberrypi python code
+    while True:
+        if ser.in_waiting > 0:
+            line = ser.readline().decode('utf-8').rstrip()
+            print(line)
+            break
+        
+    deplacement = line
     return deplacement
 
 def setupLedRGB(): #Setup des parametres pour la led RGB 
