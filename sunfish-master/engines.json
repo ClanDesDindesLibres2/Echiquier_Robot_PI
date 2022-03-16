@@ -2,6 +2,7 @@
    {
       "name": "sunfish",
       "command": "$PYTHON -u xboard.py",
-      "protocol": "xboard"
+      "protocol": "xboard",
+      "editor.mouseWheelZoom": true
    }
 ]
