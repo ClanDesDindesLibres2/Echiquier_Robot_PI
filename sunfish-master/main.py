@@ -9,3 +9,4 @@ while True:
 	finale = int(message[5:][:-5], 16)
 	print(finale)
 	#print(initiale, finale)
+	

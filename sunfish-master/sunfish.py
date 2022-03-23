@@ -524,11 +524,44 @@ def lightblue():
     GPIO.output(red, GPIO.HIGH)
     GPIO.output(green, GPIO.LOW)
     GPIO.output(blue, GPIO.LOW)
+    
+def analyseboardalphab(pos):
+
+    if pos.find("a") == 0:
+        return 1
+    if pos.find("b") == 0:
+        return 2
+    if pos.find("c") == 0:
+        return 3
+    if pos.find("d") == 0:
+        return 4
+    if pos.find("e") == 0:
+        return 5
+    if pos.find("f") == 0:
+        return 6
+    if pos.find("g") == 0:
+        return 7
+    if pos.find("h") == 0:
+        return 8
+
+def analyseboardint(pos):
+    #print(int(pos[1]))
+    y = (10-int(pos[1]))*10
+    return y 
 
 def main():
     
     hist = [Position(initial, 0, (True,True), (True,True), 0, 0)]
     searcher = Searcher()
+    
+    boardblanc = [0, 0, 0,]
+    for x in range(96): #create a board without piece
+        boardblanc.append(0)
+
+    for x in range(8):
+        boardblanc[81+x]= 1
+        boardblanc[91+x]= 1
+
     while True:
         
         print_pos(hist[-1])
@@ -541,13 +574,17 @@ def main():
        
         move = None
         while move not in hist[-1].gen_moves():
-            match = re.match('([a-h][1-8])'*2, enterPos())  ## enterPos() = fonction pour communication
+            match = re.match('([a-h][1-8])'*2, enterPos())  ## enterPos() = communication fonction
             if match:
                 move = parse(match.group(1)), parse(match.group(2))
             else:
                 # Inform the user when invalid input (e.g. "help") is entered
                 print("Please enter a move like g8f6")
         hist.append(hist[-1].move(move))
+
+        boardblanc[move[0]] = 0
+        boardblanc[move[1]] = 1
+        #print(boardblanc)
         
         # After our move we rotate the board and print it again.
         # This allows us to see the effect of our move.
@@ -561,9 +598,8 @@ def main():
         for _depth, move, score in searcher.search(hist[-1], hist):
             if time.time() - start > 1:
                 break
+        print(move)
 
-
-                #nouvelle entré dans l'historique de mouvement suite à l'analyse par l'algorithme
         
 
 
@@ -573,14 +609,17 @@ def main():
         # The black player moves from a rotated position, so we have to
         # 'back rotate' the move before printing it.
 
-        # déplacement du jouer en dessous donc lié avec le code du bras
-
         
-        print(render(119-move[0]) + " to "+ render(119-move[1]))
+        #print(render(119-move[0]) + " to "+ render(119-move[1]))
         hist.append(hist[-1].move(move))
-
-
-
+        y = analyseboardalphab(render(119-move[1]))+analyseboardint(render(119-move[1]))
+        
+        print(render(119-move[0]) + " to "+ render(119-move[1]) + " piece blanche: " )
+        print(boardblanc[y])
+        #print(y)
+      
+        boardblanc[y] = 0
+        
 if __name__ == '__main__':
     main()
 
