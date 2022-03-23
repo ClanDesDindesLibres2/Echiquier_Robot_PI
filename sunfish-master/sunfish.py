@@ -16,9 +16,9 @@ ser = serial.Serial("/dev/ttyACM0", 9600)
 #s = [0]
 
 #PINS Led RGB
-red = 12
-green = 19
-blue = 11
+red = 17
+green = 27
+blue = 22
 
 ###############################################################################
 # Piece-Square tables. Tune these to change sunfish's behaviour
@@ -415,7 +415,7 @@ def print_pos(pos):
         print(' ', 8-i, ' '.join(uni_pieces.get(p, p) for p in row))
     print('    a b c d e f g h \n\n')
 
-def enterPos(): #retourne la position voulu, mettre le code de commucation et matrice dans cette fonction
+def enterPos(startSetting): #retourne la position voulu, mettre le code de commucation et matrice dans cette fonction
     
     # s = [0]
     # message = str(ser.readline())
@@ -425,106 +425,112 @@ def enterPos(): #retourne la position voulu, mettre le code de commucation et ma
     # print(initiale, finale)
     # deplacement = input('Your move: ')
 
-    #Rasberrypi python code
-    while True:
-        if ser.in_waiting > 0:
-            line = ser.readline().decode('utf-8').rstrip()
-            print(line)
-            break
-        
-    deplacement = line
+    #Rasberrypi python 
+    startingMove = ["d2d4"]
+    startingMove.append("c2c4")
+    startingMove.append("g1f3")
+    startingMove.append("e2e3")
+    startingMove.append("b1c3")
+    startingMove.append("e3e4")
+    startingMove.append("d4d5")
+    startingMove.append("e4e5")
+    startingMove.append("h2h3")
+    startingMove.append("b2b4")
+    startingMove.append("f3d4")
+    startingMove.append("d4c6")
+    startingMove.append("c1h6")
+    startingMove.append("c3e4")
+    startingMove.append("d1f3")
+    startingMove.append("e4f6")
+
+
+
+
+
+
+    if startSetting < 1:  #Number of the pre moves made (1 for testing, 16 otherwise)
+        deplacement = startingMove[startSetting]
+    else:
+
+        while True:
+            if ser.in_waiting > 0:
+                line = ser.readline().decode('utf-8').rstrip()
+                print(line)
+                break
+        deplacement = line
+
+            
+    
     return deplacement
 
 def setupLedRGB(): #Setup des parametres pour la led RGB 
-    # GPIO.setmode(GPIO.BCM)  # choose BCM numbering scheme.  
-
-    # GPIO.setup(17, GPIO.OUT)# set GPIO 17 as output for white led  
-    # GPIO.setup(27, GPIO.OUT)# set GPIO 27 as output for red led  
-    # GPIO.setup(22, GPIO.OUT)# set GPIO 22 as output for red led
-    
-    # hz = input('Please define the frequency in Herz(recommended:75): ')
-    # reddc = input('Please define the red LED Duty Cycle: ')
-    # greendc = input('Please define the green LED Duty Cycle: ')
-    # bluedc = input('Please define the blue LED Duty Cycle: ')
-    
-    # red = GPIO.PWM(17, hz)    # create object red for PWM on port 17  
-    # green = GPIO.PWM(27, hz)      # create object green for PWM on port 27   
-    # blue = GPIO.PWM(22, hz)      # create object blue for PWM on port 22
-
-    #AUTRE CODE 
+ 
     GPIO.setmode(GPIO.BCM)  # choose BCM numbering scheme.
     GPIO.setwarnings(False)
     #set pins for different colors
-    GPIO.setup(red, GPIO.OUT)
-    GPIO.setup(green, GPIO.OUT)
-    GPIO.setup(blue, GPIO.OUT)
+    GPIO.setup(green, GPIO.OUT,initial=GPIO.LOW)
+    GPIO.setup(blue, GPIO.OUT ,initial=GPIO.LOW)
+    GPIO.setup(red, GPIO.OUT, initial=GPIO.LOW)
 
     return 1
 
 def ledRGB(self, ledState):#implementaiton de la led RGB avec couleurs et actions
-    # setupLedRGB()
-    # try:   
-    #     while True:
-    #         red.start((reddc/2.55))   #start red led
-    #         green.start((greendc/2.55)) #start green led
-    #         blue.start((bluedc/2.55))  #start blue led
-    # except KeyboardInterrupt:
-    #         red.stop()   #stop red led
-    #         green.stop() #stop green led
-    #         blue.stop()  #stop blue led
-    
-    #         GPIO.cleanup()
         
     switcher = {
         "Debut": blueColor(),
         "Humain's turn to play": greenColor(),
-        "Robot's turn to play": white(),
+        "Robot's turn to play": lightblue(),
         "Problem": redColor(),
         "You Lost": turnoff(),
-        "You Won": multipleColors()
+        "You Won": white()
     }
     ledChange  = (switcher.get(ledState, "Invalid state"))
     return ledChange
 
 #Actions and colors for the RGB Led
-def turnoff():
+def white():
     GPIO.output(red, GPIO.HIGH)
     GPIO.output(green, GPIO.HIGH)
     GPIO.output(blue, GPIO.HIGH)
-def white():
+def turnoff():
     GPIO.output(red, GPIO.LOW)
     GPIO.output(green, GPIO.LOW)
     GPIO.output(blue, GPIO.LOW)
 def redColor():
-    GPIO.output(red, GPIO.LOW)
-    GPIO.output(green, GPIO.HIGH)
-    GPIO.output(blue, GPIO.HIGH)
-def multipleColors():
-    white()
-    sleep(1)
-    greenColor()
-    sleep(1)
-def greenColor():
     GPIO.output(red, GPIO.HIGH)
     GPIO.output(green, GPIO.LOW)
-    GPIO.output(blue, GPIO.HIGH)
-def blueColor():
-    GPIO.output(red, GPIO.HIGH)
+    GPIO.output(blue, GPIO.LOW)
+    print("red")
+def greenColor():
+    GPIO.output(red, GPIO.LOW)
     GPIO.output(green, GPIO.HIGH)
     GPIO.output(blue, GPIO.LOW)
-def yellow():
+def blueColor():
     GPIO.output(red, GPIO.LOW)
     GPIO.output(green, GPIO.LOW)
     GPIO.output(blue, GPIO.HIGH)
 def purple():
-    GPIO.output(red, GPIO.LOW)
-    GPIO.output(green, GPIO.HIGH)
-    GPIO.output(blue, GPIO.LOW)
-def lightblue():
     GPIO.output(red, GPIO.HIGH)
     GPIO.output(green, GPIO.LOW)
-    GPIO.output(blue, GPIO.LOW)
-    
+    GPIO.output(blue, GPIO.HIGH)
+def lightblue():
+    GPIO.output(red, GPIO.LOW)
+    GPIO.output(green, GPIO.HIGH)
+    GPIO.output(blue, GPIO.HIGH)
+def Party():
+    index = 0
+    while (index<10):
+        greenColor()
+        sleep(0.2)
+        blueColor()
+        sleep(0.2)
+        white()
+        sleep(0.2)
+        purple()
+        sleep(0.2)
+        lightblue
+        sleep(0.2)
+        index = index +1
 def analyseboardalphab(pos):
 
     if pos.find("a") == 0:
@@ -550,7 +556,28 @@ def analyseboardint(pos):
     return y 
 
 def main():
+    startSetting = 0
+
+    setupLedRGB()
     
+    sleep(1)
+    redColor()
+    sleep(1)
+    greenColor()
+    sleep(1)
+    blueColor()
+    sleep(1)
+    lightblue()
+    sleep(1)
+    white()
+    sleep(1)
+    purple()
+    sleep(1)
+    turnoff()
+    sleep(1)
+    print("turnoff")
+    Party()
+
     hist = [Position(initial, 0, (True,True), (True,True), 0, 0)]
     searcher = Searcher()
     
@@ -574,11 +601,12 @@ def main():
        
         move = None
         while move not in hist[-1].gen_moves():
-            match = re.match('([a-h][1-8])'*2, enterPos())  ## enterPos() = communication fonction
+            match = re.match('([a-h][1-8])'*2, enterPos(startSetting))  ## enterPos() = communication fonction
             if match:
                 move = parse(match.group(1)), parse(match.group(2))
             else:
                 # Inform the user when invalid input (e.g. "help") is entered
+
                 print("Please enter a move like g8f6")
         hist.append(hist[-1].move(move))
 
@@ -619,6 +647,7 @@ def main():
         #print(y)
       
         boardblanc[y] = 0
+        startSetting = startSetting+1
         
 if __name__ == '__main__':
     main()
