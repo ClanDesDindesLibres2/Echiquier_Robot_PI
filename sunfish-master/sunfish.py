@@ -3,13 +3,22 @@
 
 from __future__ import print_function
 import re, sys, time
+from xml.etree.ElementTree import tostring
 import serial
+import RPi.GPIO as GPIO
+
+from time import sleep
 from itertools import count
 from collections import namedtuple
 
+ser = serial.Serial("/dev/ttyACM0", 9600)
 #ser = serial.Serial('COM3', 9600)
-s = [0]
-#test push 
+#s = [0]
+
+#PINS Led RGB
+red = 12
+green = 19
+blue = 11
 
 ###############################################################################
 # Piece-Square tables. Tune these to change sunfish's behaviour
@@ -415,9 +424,107 @@ def enterPos(): #retourne la position voulu, mettre le code de commucation et ma
 
     # print(initiale, finale)
     # deplacement = input('Your move: ')
-    
-    deplacement = "b1c3"
+
+    #Rasberrypi python code
+    while True:
+        if ser.in_waiting > 0:
+            line = ser.readline().decode('utf-8').rstrip()
+            print(line)
+            break
+        
+    deplacement = line
     return deplacement
+
+def setupLedRGB(): #Setup des parametres pour la led RGB 
+    # GPIO.setmode(GPIO.BCM)  # choose BCM numbering scheme.  
+
+    # GPIO.setup(17, GPIO.OUT)# set GPIO 17 as output for white led  
+    # GPIO.setup(27, GPIO.OUT)# set GPIO 27 as output for red led  
+    # GPIO.setup(22, GPIO.OUT)# set GPIO 22 as output for red led
+    
+    # hz = input('Please define the frequency in Herz(recommended:75): ')
+    # reddc = input('Please define the red LED Duty Cycle: ')
+    # greendc = input('Please define the green LED Duty Cycle: ')
+    # bluedc = input('Please define the blue LED Duty Cycle: ')
+    
+    # red = GPIO.PWM(17, hz)    # create object red for PWM on port 17  
+    # green = GPIO.PWM(27, hz)      # create object green for PWM on port 27   
+    # blue = GPIO.PWM(22, hz)      # create object blue for PWM on port 22
+
+    #AUTRE CODE 
+    GPIO.setmode(GPIO.BCM)  # choose BCM numbering scheme.
+    GPIO.setwarnings(False)
+    #set pins for different colors
+    GPIO.setup(red, GPIO.OUT)
+    GPIO.setup(green, GPIO.OUT)
+    GPIO.setup(blue, GPIO.OUT)
+
+    return 1
+
+def ledRGB(self, ledState):#implementaiton de la led RGB avec couleurs et actions
+    # setupLedRGB()
+    # try:   
+    #     while True:
+    #         red.start((reddc/2.55))   #start red led
+    #         green.start((greendc/2.55)) #start green led
+    #         blue.start((bluedc/2.55))  #start blue led
+    # except KeyboardInterrupt:
+    #         red.stop()   #stop red led
+    #         green.stop() #stop green led
+    #         blue.stop()  #stop blue led
+    
+    #         GPIO.cleanup()
+        
+    switcher = {
+        "Debut": blueColor(),
+        "Humain's turn to play": greenColor(),
+        "Robot's turn to play": white(),
+        "Problem": redColor(),
+        "You Lost": turnoff(),
+        "You Won": multipleColors()
+    }
+    ledChange  = (switcher.get(ledState, "Invalid state"))
+    return ledChange
+
+#Actions and colors for the RGB Led
+def turnoff():
+    GPIO.output(red, GPIO.HIGH)
+    GPIO.output(green, GPIO.HIGH)
+    GPIO.output(blue, GPIO.HIGH)
+def white():
+    GPIO.output(red, GPIO.LOW)
+    GPIO.output(green, GPIO.LOW)
+    GPIO.output(blue, GPIO.LOW)
+def redColor():
+    GPIO.output(red, GPIO.LOW)
+    GPIO.output(green, GPIO.HIGH)
+    GPIO.output(blue, GPIO.HIGH)
+def multipleColors():
+    white()
+    sleep(1)
+    greenColor()
+    sleep(1)
+def greenColor():
+    GPIO.output(red, GPIO.HIGH)
+    GPIO.output(green, GPIO.LOW)
+    GPIO.output(blue, GPIO.HIGH)
+def blueColor():
+    GPIO.output(red, GPIO.HIGH)
+    GPIO.output(green, GPIO.HIGH)
+    GPIO.output(blue, GPIO.LOW)
+def yellow():
+    GPIO.output(red, GPIO.LOW)
+    GPIO.output(green, GPIO.LOW)
+    GPIO.output(blue, GPIO.HIGH)
+def purple():
+    GPIO.output(red, GPIO.LOW)
+    GPIO.output(green, GPIO.HIGH)
+    GPIO.output(blue, GPIO.LOW)
+def lightblue():
+    GPIO.output(red, GPIO.HIGH)
+    GPIO.output(green, GPIO.LOW)
+    GPIO.output(blue, GPIO.LOW)
+    
 def analyseboardalphab(pos):
 
     if pos.find("a") == 0:
@@ -441,6 +548,7 @@ def analyseboardint(pos):
     #print(int(pos[1]))
     y = (10-int(pos[1]))*10
     return y 
+
 def main():
     
     hist = [Position(initial, 0, (True,True), (True,True), 0, 0)]
