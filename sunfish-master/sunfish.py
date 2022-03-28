@@ -444,10 +444,6 @@ def enterPos(startSetting): #retourne la position voulu, mettre le code de commu
     startingMove.append("e4f6")
 
 
-
-
-
-
     if startSetting < 1:  #Number of the pre moves made (1 for testing, 16 otherwise)
         deplacement = startingMove[startSetting]
     else:
@@ -471,21 +467,30 @@ def setupLedRGB(): #Setup des parametres pour la led RGB
     GPIO.setup(green, GPIO.OUT,initial=GPIO.LOW)
     GPIO.setup(blue, GPIO.OUT ,initial=GPIO.LOW)
     GPIO.setup(red, GPIO.OUT, initial=GPIO.LOW)
-
+    turnoff()
+    sleep(1)
+    
     return 1
 
-def ledRGB(self, ledState):#implementaiton de la led RGB avec couleurs et actions
-        
-    switcher = {
-        "Debut": blueColor(),
-        "Humain's turn to play": greenColor(),
-        "Robot's turn to play": lightblue(),
-        "Problem": redColor(),
-        "You Lost": turnoff(),
-        "You Won": white()
-    }
-    ledChange  = (switcher.get(ledState, "Invalid state"))
-    return ledChange
+def ledRGB(ledState):#implementaiton de la led RGB avec couleurs et actions
+    
+    print(ledState)
+
+    if ledState == 'Debut':
+        blueColor()
+    elif ledState == 'Humain s turn to play':
+        greenColor()
+    elif ledState == 'Robot s turn to play':
+        lightblue()
+    elif ledState == 'Problem':
+        redColor()
+    elif ledState == 'You Won':
+        Party()
+    elif ledState == 'You Lost':
+        turnoff()
+    else:
+        print("Invalid State")
+   
 
 #Actions and colors for the RGB Led
 def white():
@@ -519,18 +524,39 @@ def lightblue():
     GPIO.output(blue, GPIO.HIGH)
 def Party():
     index = 0
-    while (index<10):
-        greenColor()
-        sleep(0.2)
-        blueColor()
-        sleep(0.2)
-        white()
-        sleep(0.2)
-        purple()
-        sleep(0.2)
-        lightblue
-        sleep(0.2)
-        index = index +1
+    # while (index<10):
+    #     greenColor()
+    #     sleep(0.2)
+    #     blueColor()
+    #     sleep(0.2)
+    #     white()
+    #     sleep(0.2)
+    #     purple()
+    #     sleep(0.2)
+    #     lightblue
+    #     sleep(0.2)
+    #     index = index +1
+    print("party")
+
+def testLedRGB():
+    sleep(1)
+    redColor()
+    sleep(1)
+    greenColor()
+    sleep(1)
+    blueColor()
+    sleep(1)
+    lightblue()
+    sleep(1)
+    white()
+    sleep(1)
+    purple()
+    sleep(1)
+    turnoff()
+    sleep(1)
+    print("turnoff")
+    Party()
+
 def analyseboardalphab(pos):
 
     if pos.find("a") == 0:
@@ -559,24 +585,7 @@ def main():
     startSetting = 0
 
     setupLedRGB()
-    
-    sleep(1)
-    redColor()
-    sleep(1)
-    greenColor()
-    sleep(1)
-    blueColor()
-    sleep(1)
-    lightblue()
-    sleep(1)
-    white()
-    sleep(1)
-    purple()
-    sleep(1)
-    turnoff()
-    sleep(1)
-    print("turnoff")
-    Party()
+    ledRGB("Humain s turn to play")
 
     hist = [Position(initial, 0, (True,True), (True,True), 0, 0)]
     searcher = Searcher()
@@ -590,16 +599,18 @@ def main():
         boardblanc[91+x]= 1
 
     while True:
-        
+        ledRGB("Humain s turn to play")
         print_pos(hist[-1])
         
         if hist[-1].score <= -MATE_LOWER:
             print("You lost")
+            ledRGB("You Lost")
             break
 
         # We query the user until she enters a (pseudo) legal move.
        
         move = None
+        
         while move not in hist[-1].gen_moves():
             match = re.match('([a-h][1-8])'*2, enterPos(startSetting))  ## enterPos() = communication fonction
             if match:
@@ -608,6 +619,8 @@ def main():
                 # Inform the user when invalid input (e.g. "help") is entered
 
                 print("Please enter a move like g8f6")
+                ledRGB("Problem")
+                ledRGB("Humain s turn to play")
         hist.append(hist[-1].move(move))
 
         boardblanc[move[0]] = 0
@@ -619,20 +632,20 @@ def main():
         print_pos(hist[-1].rotate())
         if hist[-1].score <= -MATE_LOWER:
             print("You won")
+            ledRGB("You Won")
             break
         
         # Fire up the engine to look for a move.
         start = time.time()
+        ledRGB("Robot s turn to play")
         for _depth, move, score in searcher.search(hist[-1], hist):
             if time.time() - start > 1:
                 break
         print(move)
 
-        
-
-
         if score == MATE_UPPER:
             print("Checkmate!")
+            ledRGB("You Lost")
 
         # The black player moves from a rotated position, so we have to
         # 'back rotate' the move before printing it.
