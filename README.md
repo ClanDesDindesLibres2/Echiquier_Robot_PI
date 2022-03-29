@@ -1,2 +1,2 @@
 # RoboticArm_ChessBoard_PI
-The chess algorithm is based from the [Sunfish Chess Algorithm](https://github.com/ClanDesDindesLibres2/RoboticArm_ChessBoard_PI/tree/main/sunfish-master#introduction)
+The chess algorithm is based from the [Sunfish Chess Algorithm](https://github.com/ClanDesDindesLibres2/RoboticArm_ChessBoard_PI/tree/main/sunfish-master#introduction) the decision making of the algorithm was not touch by our team. We added function to integrate the physical board and to communicate with an arduino mega 2560 [arduino's code](https://github.com/ClanDesDindesLibres2/ChessBoard_Arduino) using a raspberry Pi 4 and to send the movement to  
