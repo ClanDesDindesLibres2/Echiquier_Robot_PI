@@ -15,6 +15,8 @@ ser = serial.Serial("/dev/ttyACM0", 9600)
 #ser = serial.Serial('COM3', 9600)
 #s = [0]
 
+
+
 #PINS Led RGB
 red = 17
 green = 27
@@ -415,7 +417,7 @@ def print_pos(pos):
         print(' ', 8-i, ' '.join(uni_pieces.get(p, p) for p in row))
     print('    a b c d e f g h \n\n')
 
-def enterPos(startSetting): #retourne la position voulu, mettre le code de commucation et matrice dans cette fonction
+def enterPos(startSetting, puzzle): #retourne la position voulu, mettre le code de commucation et matrice dans cette fonction
     
     # s = [0]
     # message = str(ser.readline())
@@ -424,33 +426,74 @@ def enterPos(startSetting): #retourne la position voulu, mettre le code de commu
 
     # print(initiale, finale)
     # deplacement = input('Your move: ')
-
+   
     #Rasberrypi python 
-    startingMove = ["d2d4"]
-    startingMove.append("c2c4")
-    startingMove.append("g1f3")
-    startingMove.append("e2e3")
-    startingMove.append("b1c3")
-    startingMove.append("e3e4")
-    startingMove.append("d4d5")
-    startingMove.append("e4e5")
-    startingMove.append("h2h3")
-    startingMove.append("b2b4")
-    startingMove.append("f3d4")
-    startingMove.append("d4c6")
-    startingMove.append("c1h6")
-    startingMove.append("c3e4")
-    startingMove.append("d1f3")
-    startingMove.append("e4f6")
+
+    
+    #puzzle 1
+    if puzzle == "1":
+        startingMove1 = ["d2d4"]
+        startingMove1.append("c2c4")
+        startingMove1.append("g1f3")
+        startingMove1.append("e2e3")
+        startingMove1.append("b1c3")
+        startingMove1.append("e3e4")
+        startingMove1.append("d4d5")
+        startingMove1.append("e4e5")
+        startingMove1.append("h2h3")
+        numStep = 9
+        #
+        startingMove1.append("b2b4")
+        startingMove1.append("f3d4")
+        startingMove1.append("d4c6")
+        startingMove1.append("c1h6")
+        startingMove1.append("c3e4")
+        startingMove1.append("d1f3")
+        startingMove1.append("e4f6")
+        startingMove1.append("e2e4")
+
+    #puzzle 2
+
+    elif puzzle == "2":
+        startingMove1 = ["e2e4"]
+        startingMove1.append("e4d5")
+        startingMove1.append("b1c3")
+        startingMove1.append("f1e2")
+        startingMove1.append("g1f3")
+        startingMove1.append("h1g1")  #right tower
+        startingMove1.append("d2d4")
+        startingMove1.append("c1e3")
+        startingMove1.append("f2e3")
+        numStep = 9
+
+    #puzzle 3
+    elif puzzle == "3":
+        startingMove1 = ["d2d4"]
+        startingMove1.append("c2c4")
+        startingMove1.append("g1f3")
+        startingMove1.append("e2e3")
+        startingMove1.append("a2a3")
+        startingMove1.append("b2b3")
+        startingMove1.append("b1c3")
+        startingMove1.append("c1d2")
+
+        startingMove1.append("g2g4")  #horsey
+        startingMove1.append("g4g5")
+        
+        numStep = 9
 
 
-    if startSetting < 1:  #Number of the pre moves made (1 for testing, 16 otherwise)
-        deplacement = startingMove[startSetting]
+
+
+
+    if startSetting < numStep:  #Number of the pre moves made (1 for testing, 16 otherwise)
+        deplacement = startingMove1[startSetting]
+
     else:
-
         while True:
             if ser.in_waiting > 0:
-                line = ser.readline().decode('utf-8').rstrip()
+                #line = ser.readline().decode('utf-8').rstrip()
+                line = input("your move : ")
                 print(line)
                 break
         deplacement = line
@@ -475,13 +518,18 @@ def setupLedRGB(): #Setup des parametres pour la led RGB
 def ledRGB(ledState):#implementaiton de la led RGB avec couleurs et actions
     
     print(ledState)
-
+    turnoff()
+    sleep(1)
     if ledState == 'Debut':
         blueColor()
+        
     elif ledState == 'Humain s turn to play':
+        print("test")
         greenColor()
+        
     elif ledState == 'Robot s turn to play':
         lightblue()
+        
     elif ledState == 'Problem':
         redColor()
     elif ledState == 'You Won':
@@ -524,18 +572,18 @@ def lightblue():
     GPIO.output(blue, GPIO.HIGH)
 def Party():
     index = 0
-    # while (index<10):
-    #     greenColor()
-    #     sleep(0.2)
-    #     blueColor()
-    #     sleep(0.2)
-    #     white()
-    #     sleep(0.2)
-    #     purple()
-    #     sleep(0.2)
-    #     lightblue
-    #     sleep(0.2)
-    #     index = index +1
+    while (index<10):
+        greenColor()
+        sleep(0.2)
+        blueColor()
+        sleep(0.2)
+        white()
+        sleep(0.2)
+        purple()
+        sleep(0.2)
+        lightblue
+        sleep(0.2)
+        index = index +1
     print("party")
 
 def testLedRGB():
@@ -583,9 +631,17 @@ def analyseboardint(pos):
 
 def main():
     startSetting = 0
-
+    puzzle = input("please select puzzle (1, 2 or 3): ")
+    print("you selected puzzle : ")
+    print(puzzle)
     setupLedRGB()
-    ledRGB("Humain s turn to play")
+
+    
+    #testLedRGB()
+    debut = 0
+    if debut == 0:
+        ledRGB("Debut")
+        debut = debut + 1
 
     hist = [Position(initial, 0, (True,True), (True,True), 0, 0)]
     searcher = Searcher()
@@ -599,7 +655,8 @@ def main():
         boardblanc[91+x]= 1
 
     while True:
-        ledRGB("Humain s turn to play")
+
+        
         print_pos(hist[-1])
         
         if hist[-1].score <= -MATE_LOWER:
@@ -608,19 +665,33 @@ def main():
             break
 
         # We query the user until she enters a (pseudo) legal move.
-       
+        print(startSetting)
+        if(startSetting > 8):
+            ledRGB("Humain s turn to play")
         move = None
-        
+
+       
+        probleme = 0
         while move not in hist[-1].gen_moves():
-            match = re.match('([a-h][1-8])'*2, enterPos(startSetting))  ## enterPos() = communication fonction
+            if probleme == 1:
+                ledRGB("Problem")
+                
+                probleme = 0
+
+            match = re.match('([a-h][1-8])'*2, enterPos(startSetting , puzzle))  ## enterPos() = communication fonction
+
+            
             if match:
-                move = parse(match.group(1)), parse(match.group(2))
+                print("match")
+                move = parse(match.group(1)), parse(match.group(2)) 
             else:
                 # Inform the user when invalid input (e.g. "help") is entered
 
                 print("Please enter a move like g8f6")
                 ledRGB("Problem")
-                ledRGB("Humain s turn to play")
+                sleep(1)
+            probleme = probleme + 1
+                
         hist.append(hist[-1].move(move))
 
         boardblanc[move[0]] = 0
@@ -637,9 +708,13 @@ def main():
         
         # Fire up the engine to look for a move.
         start = time.time()
-        ledRGB("Robot s turn to play")
+
+        if(startSetting > 8):
+            ledRGB("Robot s turn to play")
+        
         for _depth, move, score in searcher.search(hist[-1], hist):
             if time.time() - start > 1:
+                
                 break
         print(move)
 
@@ -652,6 +727,7 @@ def main():
 
         
         #print(render(119-move[0]) + " to "+ render(119-move[1]))
+
         hist.append(hist[-1].move(move))
         y = analyseboardalphab(render(119-move[1]))+analyseboardint(render(119-move[1]))
         
@@ -661,6 +737,7 @@ def main():
       
         boardblanc[y] = 0
         startSetting = startSetting+1
+        
         
 if __name__ == '__main__':
     main()
