@@ -31,21 +31,9 @@ class communicationOPENCR:
                         
                 except KeyboardInterrupt:
                     print("KeyboardInterrupt has been caught.")
-    """
-        def readData(self):
-        with serial.Serial(self.port, 9600, timeout=1) as OpenCR:
-            while True:
-                if OpenCR.in_waiting >0:
-                    done = OpenCR.readline().decode('utf-8').rstrip
-                    print(done)
-                    break
-    """
 
 
 
 if __name__ == '__main__':
     openCR_comm = communicationOPENCR('COM3')
     openCR_comm.sendData(12,14,0)
-    yo = 4
-    print(yo)
-    ##openCR_comm.readData()
