@@ -486,8 +486,8 @@ def enterPos(startSetting,
     else:
         while True:
             if ser.in_waiting > 0:
-                # line = ser.readline().decode('utf-8').rstrip()
-                line = input("your move : ")
+                line = ser.readline().decode('utf-8').rstrip()
+                #line = input("your move : ")
                 print(line)
                 break
         deplacement = line
@@ -768,7 +768,12 @@ def main():
 
         print(render(119 - move[0]) + " to " + render(119 - move[1]) + " piece blanche: ")
         print(boardblanc[y])
-        sendData(boardblanc[y])
+
+        if (startSetting > 8):
+            if boardblanc[y] == 1:
+                sendData(y)
+            else:
+                sendData(0)
 
         # print(y)
 

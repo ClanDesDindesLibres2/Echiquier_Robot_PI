@@ -20,6 +20,10 @@ class communicationOPENCR:
                     if  OpenCR.inWaiting()>0: 
                         answer=OpenCR.readline()
                         OpenCR.flushInput() #remove data after reading
+                        done = int(answer)
+                        if done>=1:
+                            done = done+1
+
                 except KeyboardInterrupt:
                     print("KeyboardInterrupt has been caught.")
 
