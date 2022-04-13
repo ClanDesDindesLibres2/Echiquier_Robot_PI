@@ -11,7 +11,9 @@ from time import sleep
 from itertools import count
 from collections import namedtuple
 
+#/dev/ttyACM0
 ser = serial.Serial("/dev/ttyACM0", 9600)
+#ser = serial.Serial("/dev/ttyACM1", 9600)
 # ser = serial.Serial('COM3', 9600)
 
 
@@ -416,7 +418,7 @@ def print_pos(pos):
 
 
 def enterPos(startSetting,
-             puzzle):  # retourne la position voulu, mettre le code de commucation et matrice dans cette fonction
+             puzzle, numStep):  # retourne la position voulu, mettre le code de commucation et matrice dans cette fonction
 
     # s = [0]
     # message = str(ser.readline())
@@ -439,7 +441,13 @@ def enterPos(startSetting,
         startingMove1.append("d4d5")
         startingMove1.append("e4e5")
         startingMove1.append("h2h3")
-        numStep = 9
+
+        
+        startingMove1.append("g2g4")
+        startingMove1.append("b2b3")
+        startingMove1.append("a1b1")
+        startingMove1.append("c3a4")
+        #numStep = 2
         #
         startingMove1.append("b2b4")
         startingMove1.append("f3d4")
@@ -462,7 +470,13 @@ def enterPos(startSetting,
         startingMove1.append("d2d4")
         startingMove1.append("c1e3")
         startingMove1.append("f2e3")
-        numStep = 9
+
+        
+        startingMove1.append("a2a3")
+        startingMove1.append("e3e4")
+        startingMove1.append("d1d3")
+        startingMove1.append("d4d5")
+        #numStep = 2
 
     # puzzle 3
     elif puzzle == "3":
@@ -474,19 +488,24 @@ def enterPos(startSetting,
         startingMove1.append("b2b3")
         startingMove1.append("b1c3")
         startingMove1.append("c1d2")
-
         startingMove1.append("g2g4")  # horsey
-        startingMove1.append("g4g5")
+        
+        startingMove1.append("f1h3")
+        startingMove1.append("a1b1")
+        startingMove1.append("f3g5")
+        startingMove1.append("e1f2")
 
-        numStep = 9
+       # numStep = 2
 
-    if startSetting < numStep:  # Number of the pre moves made (1 for testing, 16 otherwise)
+    if startSetting < numStep+1:  # Number of the pre moves made (1 for testing, 16 otherwise)
         deplacement = startingMove1[startSetting]
 
     else:
         while True:
+           # print("before if")
             if ser.in_waiting > 0:
                 line = ser.readline().decode('utf-8').rstrip()
+
                 #line = input("your move : ")
                 print(line)
                 break
@@ -513,7 +532,7 @@ def ledRGB(ledState):  # implementaiton de la led RGB avec couleurs et actions
 
     print(ledState)
     turnoff()
-    sleep(1)
+    #sleep(1)
     if ledState == 'Debut':
         blueColor()
 
@@ -527,9 +546,10 @@ def ledRGB(ledState):  # implementaiton de la led RGB avec couleurs et actions
     elif ledState == 'Problem':
         redColor()
     elif ledState == 'You Won':
-        Party()
-    elif ledState == 'You Lost':
         turnoff()
+    elif ledState == 'You Lost':
+        Party()
+        
     else:
         print("Invalid State")
 
@@ -633,12 +653,36 @@ def analyseboardalphab(pos):
     if pos.find("h") == 0:
         return 8
 
-
 def analyseboardint(pos):
     # print(int(pos[1]))
     y = (10 - int(pos[1])) * 10
     return y
 
+class communicationOPENCR:
+    def __init__(self, port):
+        self.port = port
+
+    def sendDataOpenCR(self, pos1, pos2, piece):
+        with serial.Serial(self.port, 57600, timeout=1) as OpenCR:
+            time.sleep(0.1) #wait for serial to open
+            if OpenCR.isOpen():
+                print("{} connected!")
+                try:
+                    values = str(pos1) + " " + str(pos2) + " " +  str(piece)
+                    print(values)
+                    OpenCR.write(values.encode())
+                    #time.sleep(0.1) #wait for OpenCR to answer
+                    while OpenCR.inWaiting()==0: pass
+                    if  OpenCR.inWaiting()>0: 
+                        answer=OpenCR.readline()
+                        OpenCR.flushInput() #remove data after reading
+                        done = int(answer)
+                        if done>=1:
+                            done = done+1
+                            print(done)
+
+                except KeyboardInterrupt:
+                    print("KeyboardInterrupt has been caught.")
 
 def sendData(value):
     # value:    0 : good move
@@ -670,6 +714,11 @@ def sendData(value):
 
 
 def main():
+  #  openCR_comm = communicationOPENCR('/dev/ttyACM0')
+  #  openCR_comm.sendDataOpenCR(12,14,0)
+    
+    numStep = 11
+   
     startSetting = 0
     puzzle = input("please select puzzle (1, 2 or 3): ")
     print("you selected puzzle : ")
@@ -704,7 +753,7 @@ def main():
 
         # We query the user until she enters a (pseudo) legal move.
         print(startSetting)
-        if (startSetting > 8):
+        if (startSetting > numStep):
             ledRGB("Humain s turn to play")
         move = None
 
@@ -716,7 +765,7 @@ def main():
                 sendData(1)
                 probleme = 0
 
-            match = re.match('([a-h][1-8])' * 2, enterPos(startSetting, puzzle))  ## enterPos() = communication fonction
+            match = re.match('([a-h][1-8])' * 2, enterPos(startSetting, puzzle, numStep))  ## enterPos() = communication fonction
 
             if match:
                 print("match")
@@ -746,7 +795,7 @@ def main():
         # Fire up the engine to look for a move.
         start = time.time()
 
-        if (startSetting > 8):
+        if (startSetting > numStep):
             ledRGB("Robot s turn to play")
 
         for _depth, move, score in searcher.search(hist[-1], hist):
@@ -764,12 +813,24 @@ def main():
         # print(render(119-move[0]) + " to "+ render(119-move[1]))
 
         hist.append(hist[-1].move(move))
+        x = analyseboardalphab(render(119 - move[0])) + analyseboardint(render(119 - move[0]))
+
         y = analyseboardalphab(render(119 - move[1])) + analyseboardint(render(119 - move[1]))
 
         print(render(119 - move[0]) + " to " + render(119 - move[1]) + " piece blanche: ")
-        print(boardblanc[y])
+        
 
-        if (startSetting > 8):
+        #sendDataOpenCR(x,y, boardblanc[y])
+
+        print(boardblanc[y])
+        
+        
+        
+
+        if (startSetting > numStep):
+
+            sleep(5)# delay for the movement 
+
             if boardblanc[y] == 1:
                 sendData(y)
             else:

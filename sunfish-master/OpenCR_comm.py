@@ -6,8 +6,8 @@ class communicationOPENCR:
     def __init__(self, port):
         self.port = port
 
-    def sendData(self, pos1, pos2, piece):
-        with serial.Serial(self.port, 9600, timeout=1) as OpenCR:
+    def sendDataOpenCR(self, pos1, pos2, piece):
+        with serial.Serial(self.port, 57600, timeout=1) as OpenCR:
             time.sleep(0.1) #wait for serial to open
             if OpenCR.isOpen():
                 print("{} connected!")
@@ -23,10 +23,11 @@ class communicationOPENCR:
                         done = int(answer)
                         if done>=1:
                             done = done+1
+                            #print(done)
 
                 except KeyboardInterrupt:
                     print("KeyboardInterrupt has been caught.")
 
 if __name__ == '__main__':
-    openCR_comm = communicationOPENCR('COM3')
-    openCR_comm.sendData(12,14,0)
+    openCR_comm = communicationOPENCR('/dev/ttyACM1')
+    openCR_comm.sendDataOpenCR(12,14,0)
