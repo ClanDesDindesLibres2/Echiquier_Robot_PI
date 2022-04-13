@@ -1,4 +1,4 @@
-# Sunfish Algorithm
+# ChessBras's Sunfish Algorithm
 The sunfish algorithm run's in a loop **simulating a chess game**. The algorithm is used for the **robotic arm**'s moves. He his the **opponent to defeat**. 
 
 ## Communication between Arduino, Rasberry Pi and Open CR(Robot)
